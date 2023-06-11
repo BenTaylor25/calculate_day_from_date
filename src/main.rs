@@ -45,7 +45,7 @@ fn month_code(month: i32) -> i32 {
         10 => 6,
         11 => 2,
         12 => 4,
-        _ => -500   // refactor to use Option?
+        _ => panic!("month_code() invalid month")
     }
 }
 
@@ -58,31 +58,31 @@ fn day_from_code(day_code: i32) -> &'static str {
         5 => "Friday",
         6 => "Saturday",
         0 => "Sunday",
-        _ => "[it broke]"   // refactor to use Option?
+        _ => panic!("day_from_code() invalid day code")
     }
 }
 
 fn print_day_of_date(day: i32, month: i32, year: i32) {
-    let shifted_year = shift_by_400(year);   // 1996
+    let shifted_year = shift_by_400(year);
 
-    let mut year_code = shifted_year % 100;   // 96
-    year_code = five_quarters_round(year_code);   // 120
-    if is_leap_year(shifted_year) {
-        year_code -= 1;   // 119
+    let mut year_code = shifted_year % 100;
+    year_code = five_quarters_round(year_code);
+    year_code += calc_century_modifier(shifted_year);
+
+    let mut day_code = (day + month_code(month) + year_code) % 7;
+    if is_leap_year(year) && month <= 2 {
+        day_code -= 1;
     }
-    year_code += calc_century_modifier(shifted_year);   // 120
 
-    let day_code = (day + month_code(month) + year_code) % 7;
-
-    println!("{}", day + month_code(month) + year_code);
-    println!("{}/{}/{} is a {}", day, month, year, day_from_code(day_code));
+    println!("{}   ({}/{}/{})", day_from_code(day_code), day, month, year);
 }
 
 fn main() {
-    // print_day_of_date(24, 9, 2057);
-    // print_day_of_date(25, 7, 2003);
-    // print_day_of_date(18, 2, 2100);
-    // print_day_of_date(4, 3, 1992);
-
-    print_day_of_date(22, 4, 1996);
+    print_day_of_date(24, 09, 2057);
+    print_day_of_date(14, 11, 1893);
+    print_day_of_date(04, 03, 1992);
+    print_day_of_date(18, 02, 2100);
+    print_day_of_date(25, 07, 2003);
+    print_day_of_date(26, 07, 3000);
+    print_day_of_date(24, 05, 2550);
 }
