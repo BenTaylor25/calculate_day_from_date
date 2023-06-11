@@ -63,16 +63,38 @@ fn day_from_code(day_code: i32) -> &'static str {
 }
 
 fn print_day_of_date(day: i32, month: i32, year: i32) {
+    /* 
+        The Gregorian Calendar repeats every 400 years.
+        Move all years into the range 1800-2199 for ease of calculation.
+    */
     let shifted_year = shift_by_400(year);
 
+    /*
+        1. Take the last two digits of the year.
+        2. Multiply by 5/4 and truncate.
+        3. Add century-offset (1800s: 3, 1900s: 1, 2000s: 0, 2100s 5).
+    */
     let mut year_code = shifted_year % 100;
     year_code = five_quarters_round(year_code);
     year_code += calc_century_modifier(shifted_year);
 
-    let mut day_code = (day + month_code(month) + year_code) % 7;
-    if is_leap_year(year) && month <= 2 {
-        day_code -= 1;
-    }
+    /*
+        Each month has a fixed month code
+        (but January and February are offset by -1 on leap years).
+
+        1. Determine month_code.
+        2. Sum date_of_month + month_code + year_code.
+        3. REM 7.
+    */
+    let leap_offset = if is_leap_year(year) && month <= 2 {-1} else {0};
+    let day_code = (day + month_code(month) + leap_offset + year_code) % 7;
+
+    /*
+        day_code of 0 => Sunday
+        day_code of 1 => Monday
+        ...
+        day_code of 6 => Saturday
+    */
 
     println!("{}   ({}/{}/{})", day_from_code(day_code), day, month, year);
 }
